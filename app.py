@@ -1,17 +1,43 @@
-from flask import Flask, request, render_template, url_for, redirect, jsonify
+from flask import Flask, request, render_template, url_for, redirect, jsonify, session
 from werkzeug.exceptions import abort
 
 app = Flask(__name__)  # objeto de flask
+
+app.secret_key = 'Mi_llave_secreta'
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Omitimos validacion de usuario y password
+
+        usuario = request.form['username']  # nombre igual a name de template
+        # Agregar el usuario a la sesion:
+        session['username'] = usuario
+        # session['username'] = request.form['username']
+        return redirect(url_for('inicio'))
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.pop('username')
+    return redirect(url_for('inicio'))
 
 
 # http://localhost:5000/
 @app.route("/")
 def inicio():
+    if 'username' in session:
+        return f'El usuario {session["username"]} ya ha hecho login'
+    return 'No ha hecho login'
+
     # app.logger.debug('Mensaje a nivel debug')
-    app.logger.info(f'Entramos al path: {request.path}')
+    # app.logger.info(f'Entramos al path: {request.path}')
     # app.logger.warn('Mensaje a nivel warn')
     # app.logger.error('Mensaje a nivel ERROR')
-    return "<p>Hello, World! from flask</p>"
+
+    # return "<p>Hello, World! from flask</p>"
 
 
 @app.route('/saludar/<nombre>')
